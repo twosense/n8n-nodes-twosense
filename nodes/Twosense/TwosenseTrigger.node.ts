@@ -40,6 +40,7 @@ export class TwosenseTrigger implements INodeType {
 		outputs: ['main'],
 		credentials: [{ name: 'twosenseApi', required: true }],
 		properties: [],
+		usableAsTool: true,
 	};
 
 	async poll(this: IPollFunctions): Promise<INodeExecutionData[][] | null> {
