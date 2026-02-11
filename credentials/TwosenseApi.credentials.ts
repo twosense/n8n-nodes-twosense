@@ -7,8 +7,8 @@ import type {
 export class TwosenseApi implements ICredentialType {
 	name = 'twosenseApi';
 	displayName = 'Twosense API (Client Credentials) API';
-	documentationUrl = 'https://docs.n8n.io/integrations/creating-nodes/overview/';
-	icon = 'file:../assets/twosense-icon.svg' as const;
+	documentationUrl = 'https://twosense.readme.io';
+	icon = 'file:../assets/twosense.svg' as const;
 
 	properties: INodeProperties[] = [
 		{

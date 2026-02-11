@@ -29,7 +29,7 @@ export class TwosenseTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Twosense Trigger',
 		name: 'twosenseTrigger',
-		icon: 'file:../../assets/twosense-icon.svg',
+		icon: 'file:../../assets/twosense.svg',
 		group: ['trigger'],
 		version: 1,
 		subtitle: 'Real-time events polling',

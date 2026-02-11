@@ -25,7 +25,7 @@ export class Twosense implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Twosense',
 		name: 'twosense',
-		icon: 'file:../../assets/twosense-icon.svg',
+		icon: 'file:../../assets/twosense.svg',
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
