@@ -1,6 +1,6 @@
 # n8n-nodes-twosense
 
-This is an n8n community node that lets you use [Twosense](https://twosense.ai) in your n8n workflows.
+This is an n8n community node that lets you use [Twosense](https://twosense.ai) events in your n8n workflows.
 
 Twosense provides continuous authentication and behavioral biometrics to secure access to your applications.
 
@@ -8,6 +8,7 @@ Twosense provides continuous authentication and behavioral biometrics to secure 
 
 [Installation](#installation)
 [Operations](#operations)
+[Trigger](#trigger)
 [Credentials](#credentials)
 [Compatibility](#compatibility)
 [Requirements](#requirements)
@@ -20,37 +21,30 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 ## Operations
 
-The Twosense node provides access to three resources, each with specific operations:
+The Twosense node provides the following actions:
 
-### Events
+### Get Twosense Events
 
-**Get Historical**
-- Fetch events within a specific time range
+Fetch Twosense events within a specific time range for batch processing or historical analysis.
+
 - Requires start time and optional end time parameters
 - Returns all events within the specified period
-- Useful for batch processing or historical analysis
+- Automatically handles pagination when there are many events
 
-**Get Real-Time**
-- Continuously fetch new events since the last execution
-- Maintains cursor state between runs to only return new events
-- First execution initializes the cursor to current time (no events returned)
-- Subsequent executions return events since last run
-- Ideal for monitoring and real-time alerting workflows
+### Get Twosense Session Information
 
-### Session
+Retrieve detailed information about a specific Twosense session by its ID.
 
-**Get**
-- Retrieve detailed information about a specific session
 - Requires session ID (UUID format)
 - Returns structured data with `found` indicator:
   - `found: true` → Session data (startTime, userId, device, ipAddress)
   - `found: false` → Reason why session wasn't found
 - No exceptions thrown - use IF node to branch on `found` field
 
-### Trust Score
+### Get Twosense Trust Score
 
-**Get**
-- Get the current trust score for a user
+Get the current Twosense trust score and trust level for a specific user.
+
 - Requires username in `DOMAIN\username` format (or UPN if using Entra ID)
 - Returns structured data with `found` indicator:
   - `found: true` → Trust score data (trustScore 0-100, trustLevel high/medium/low, timestamp, device)
@@ -61,7 +55,16 @@ The Twosense node provides access to three resources, each with specific operati
 **Features:**
 - Automatic OAuth2 token management and refresh
 - Pagination support for event operations
-- State persistence for real-time event polling
+
+## Trigger
+
+### On New Twosense Event
+
+The **Twosense Trigger** node polls for new Twosense events and triggers your workflow automatically when new events are detected.
+
+- Uses n8n's built-in polling mechanism (configure the interval in the trigger settings)
+- Maintains cursor state between runs to only return new events
+- Ideal for monitoring and real-time alerting workflows
 
 ## Credentials
 
@@ -73,101 +76,30 @@ This node requires Twosense API credentials. You'll need to provide:
 
 Contact your Twosense administrator to obtain these credentials.
 
-## Compatibility
-
-Tested with n8n version 1.0+
-
 ## Requirements
 
 ### Database Configuration
 
 **Important:** For reliable state persistence, this node requires n8n to be configured with **PostgreSQL** as the database backend.
 
-#### Why PostgreSQL?
-
-n8n's default SQLite database has known issues with state persistence ([n8n issue #6564](https://github.com/n8n-io/n8n/issues/6564)) that can cause:
-- Events to be refetched on every execution (duplicates)
-- State data to fail to persist 12-50% of the time
-
-PostgreSQL provides reliable state persistence and is recommended for production n8n deployments.
-
-#### Setting Up n8n with PostgreSQL
-
-**Docker Compose Example:**
-
-```yaml
-version: '3.8'
-
-services:
-  postgres:
-    image: postgres:16
-    restart: always
-    environment:
-      POSTGRES_DB: n8n
-      POSTGRES_USER: n8n
-      POSTGRES_PASSWORD: n8n_password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  n8n:
-    image: n8nio/n8n
-    restart: always
-    ports:
-      - "5678:5678"
-    environment:
-      DB_TYPE: postgresdb
-      DB_POSTGRESDB_HOST: postgres
-      DB_POSTGRESDB_DATABASE: n8n
-      DB_POSTGRESDB_USER: n8n
-      DB_POSTGRESDB_PASSWORD: n8n_password
-    volumes:
-      - n8n_data:/home/node/.n8n
-    depends_on:
-      - postgres
-
-volumes:
-  postgres_data:
-  n8n_data:
-```
-
-See the [n8n PostgreSQL documentation](https://docs.n8n.io/hosting/configuration/environment-variables/database/) for more details.
-
-#### Using SQLite (Not Recommended)
-
-If you must use SQLite, be aware that:
-- Events may be duplicated across executions
-- State persistence is unreliable
-- The node will still function but may refetch all events periodically
-
-## Usage
-
 ### Real-Time Event Monitoring Workflow
 
-1. Add a **Schedule Trigger** to poll at your desired interval (e.g., every 5 minutes)
-2. Add the **Twosense** node
-3. Select **Resource**: Events
-4. Select **Operation**: Get Real-Time
-5. Configure your Twosense API credentials
-6. Connect downstream nodes to process the events
-
-**First Run Behavior:**
-On the first execution, the cursor is set to the current time and no events are returned. Subsequent executions will fetch only new events since the last run.
+1. Add the **On New Twosense Event** Trigger node to your workflow
+2. Configure the polling interval in the trigger settings (e.g., every 5 minutes)
+3. Configure your Twosense API credentials
+4. Connect downstream nodes to process the events
 
 ### Historical Event Analysis Workflow
 
-1. Add the **Twosense** node
-2. Select **Resource**: Events
-3. Select **Operation**: Get Historical
-4. Set the **Start Time** and optional **End Time**
-5. Connect downstream nodes to analyze the historical data
+1. Add the **Get Twosense Events** node
+2. Set the **Start Time** and optional **End Time**
+3. Connect downstream nodes to analyze the historical data
 
 ### Trust Score Check Workflow
 
-1. Add the **Twosense** node
-2. Select **Resource**: Trust Score
-3. Select **Operation**: Get
-4. Enter the **Username** (format: `DOMAIN\username`)
-5. Use an **IF** node to branch on the `found` field:
+1. Add the **Get Twosense Trust Score** node
+2. Enter the **Username** (format: `DOMAIN\username`)
+3. Use an **IF** node to branch on the `found` field:
    - `found: true` → Trust score found (includes `trustScore`, `trustLevel`, `device`, etc.)
    - `found: false, reason: 'user_not_found'` → User doesn't exist
    - `found: false, reason: 'no_recent_score'` → No score within 60 minutes
@@ -210,11 +142,9 @@ No recent score (204):
 
 ### Session Information Lookup
 
-1. Add the **Twosense** node
-2. Select **Resource**: Session
-3. Select **Operation**: Get
-4. Enter the **Session ID** (UUID)
-5. Use an **IF** node to branch on the `found` field:
+1. Add the **Get Twosense Session Information** node
+2. Enter the **Session ID** (UUID)
+3. Use an **IF** node to branch on the `found` field:
    - `found: true` → Session found (includes `startTime`, `userId`, `device`, `ipAddress`)
    - `found: false, reason: 'session_not_found'` → Session doesn't exist
 
@@ -243,7 +173,7 @@ Session not found (404):
 
 ### Event Data Structure
 
-Events returned from **Get Historical** and **Get Real-Time** include:
+Events returned from **Get Twosense Events** and the **Twosense Trigger** include:
 - `uuid` - Unique event identifier
 - `timestamp` - When the event occurred
 - `published` - When the event was published (used for cursor tracking)
@@ -256,14 +186,11 @@ Events returned from **Get Historical** and **Get Real-Time** include:
 - `action` - Action taken
 - `application` - Application name
 
-### Pagination
-
-Event operations automatically handle pagination when there are many events to fetch. All events will be retrieved and returned in a single execution.
-
 ## Resources
 
-- [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
 - [Twosense](https://twosense.ai)
+- [Twosense API Documentation](https://twosense.readme.io)
+- [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
 - [n8n documentation](https://docs.n8n.io/)
 
 ## License

@@ -29,7 +29,7 @@ export class Twosense implements INodeType {
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Interact with Twosense API',
+		description: 'Continuous authentication and behavioral biometrics by Twosense',
 		defaults: { name: 'Twosense' },
 		inputs: ['main'],
 		outputs: ['main'],
@@ -71,10 +71,10 @@ export class Twosense implements INodeType {
 				},
 				options: [
 					{
-						name: 'Get Historical',
+						name: 'Get Twosense Events',
 						value: 'getHistorical',
-						description: 'Fetch events within a specific time range',
-						action: 'Get historical events',
+						description: 'Fetch Twosense events within a specific time range for batch processing or historical analysis',
+						action: 'Get Twosense events',
 					},
 				],
 				default: 'getHistorical',
@@ -93,10 +93,10 @@ export class Twosense implements INodeType {
 				},
 				options: [
 					{
-						name: 'Get',
+						name: 'Get Twosense Session Information',
 						value: 'get',
-						description: 'Get session information',
-						action: 'Get session information',
+						description: 'Retrieve detailed information about a specific Twosense session by its ID',
+						action: 'Get Twosense session information',
 					},
 				],
 				default: 'get',
@@ -115,10 +115,10 @@ export class Twosense implements INodeType {
 				},
 				options: [
 					{
-						name: 'Get',
+						name: 'Get Twosense Trust Score',
 						value: 'get',
-						description: 'Get trust score for a user',
-						action: 'Get trust score',
+						description: 'Get the current Twosense trust score and trust level for a specific user',
+						action: 'Get Twosense trust score',
 					},
 				],
 				default: 'get',

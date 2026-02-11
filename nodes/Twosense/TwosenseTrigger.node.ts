@@ -33,7 +33,7 @@ export class TwosenseTrigger implements INodeType {
 		group: ['trigger'],
 		version: 1,
 		subtitle: 'Real-time events polling',
-		description: 'Triggers workflow when new Twosense events are detected',
+		description: 'On new Twosense event — triggers workflow when new Twosense events are detected',
 		defaults: { name: 'Twosense Trigger' },
 		polling: true,
 		inputs: [],
